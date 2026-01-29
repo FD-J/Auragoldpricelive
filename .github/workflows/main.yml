@@ -44,14 +44,16 @@ jobs:
         run: python update_rates.py
 
 
-      # Commit and push changes
       - name: Commit and Push
-        run: |
-          git config user.name "Auto Bot"
-          git config user.email "bot@users.noreply.github.com"
+  run: |
+    git config user.name "Auto Bot"
+    git config user.email "bot@users.noreply.github.com"
 
-          date > heartbeat.txt
+    git pull origin main --rebase
 
-          git add index.html heartbeat.txt
-          git commit -m "Auto update prices" || exit 0
-          git push
+    date > heartbeat.txt
+
+    git add index.html heartbeat.txt
+    git commit -m "Auto update prices" || exit 0
+
+    git push origin main

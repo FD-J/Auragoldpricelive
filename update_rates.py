@@ -71,7 +71,7 @@ def main():
 <meta charset="UTF-8">
 <title>FDJ Live Rates</title>
 
-<meta http-equiv="refresh" content="600">
+<!-- Auto refresh handled by GitHub bot -->
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 

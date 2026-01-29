@@ -1,9 +1,9 @@
-name: Price Update Bot
+name: Price Update Bot (Self Healing)
 
 on:
-  schedule:
-    - cron: "0,10,20,30,40,50 * * * *"
   workflow_dispatch:
+  repository_dispatch:
+    types: [self-run]
 
 
 permissions:
@@ -17,38 +17,57 @@ jobs:
 
     steps:
 
+      # Get repo
       - name: Checkout
         uses: actions/checkout@v4
 
 
+      # Setup Python
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
 
+      # Install dependency
       - name: Install Requests
         run: pip install requests
 
 
-      - name: Wait 30 Seconds
-        run: sleep 30
-
-
-      - name: Run Price Script
-        run: python update_rates.py
-
-
-      - name: Commit and Push
+      # Run updater (with retry safety)
+      - name: Run Script (Retry Safe)
+        run: |
+          for i in 1 2 3
+          do
+            python update_rates.py && break
+            echo "Retry $i..."
+            sleep 15
+          done
+      # Keep repo alive
+      - name: Update Heartbeat
+        run: |
+          date > heartbeat.txt
+      # Commit if changed
+      - name: Commit Changes
         run: |
           git config user.name "Auto Bot"
           git config user.email "bot@users.noreply.github.com"
-
-          git pull origin main --rebase
-
-          date > heartbeat.txt
-
           git add index.html heartbeat.txt
           git commit -m "Auto update prices" || exit 0
+      # Push
+      - name: Push Changes
+        run: git push
 
-          git push origin main
+
+      # Re-trigger itself
+      - name: Schedule Next Run (10 min)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Waiting 10 minutes..."
+          sleep 600
+          curl -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/${{ github.repository }}/dispatches \
+            -d '{"event_type":"self-run"}'

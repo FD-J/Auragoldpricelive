@@ -25,12 +25,24 @@ def get_api_data(url):
         return None
 
 
+def format_time(api_time):
+
+    try:
+        # Convert API time to readable format
+        dt = datetime.datetime.fromisoformat(api_time.replace("Z", "+00:00"))
+
+        return dt.strftime("%d-%m-%Y  %H:%M")
+
+    except:
+        return datetime.datetime.now().strftime("%d-%m-%Y  %H:%M")
+
+
+
 def main():
 
     gold = get_api_data(G_URL)
     silver = get_api_data(S_URL)
 
-    # Stop if API failed
     if not gold or not silver:
         print("API Failed. File not updated.")
         return
@@ -44,62 +56,135 @@ def main():
     s_sell = f"{float(silver['aura_sell_price']):,.2f}"
 
 
-    api_time = gold.get("created_at", "Live")
+    # Format Time
+    api_time_raw = gold.get("created_at", "")
+    api_time = format_time(api_time_raw)
 
 
     # HTML
     html = f"""
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 <title>FDJ Live Rates</title>
 
-<meta http-equiv="refresh" content="60">
+<meta http-equiv="refresh" content="600">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
+
+* {{
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}}
+
 body {{
-    background:#0f172a;
-    color:white;
-    font-family:Arial;
+    background: linear-gradient(135deg,#020617,#020617,#020617,#020617);
+    height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
-    height:100vh;
+    color:white;
 }}
 
+
 .card {{
-    background:#1e293b;
-    padding:25px;
-    border-radius:15px;
-    width:320px;
+    background: rgba(30,41,59,0.9);
+    width:360px;
+    padding:28px;
+    border-radius:22px;
+    box-shadow:0 25px 60px rgba(0,0,0,0.7);
+    animation: slideUp 1s ease;
+    backdrop-filter: blur(10px);
 }}
+
+
+@keyframes slideUp {{
+    from {{
+        opacity:0;
+        transform:translateY(40px);
+    }}
+    to {{
+        opacity:1;
+        transform:translateY(0);
+    }}
+}}
+
 
 h2 {{
     text-align:center;
-    color:#fbbf24;
+    color:#facc15;
+    margin-bottom:25px;
+    font-weight:600;
 }}
+
+
+.section {{
+    background: rgba(255,255,255,0.04);
+    padding:15px;
+    border-radius:14px;
+    margin-bottom:15px;
+    animation: fadeIn 1.3s ease;
+}}
+
+
+@keyframes fadeIn {{
+    from {{ opacity:0; }}
+    to {{ opacity:1; }}
+}}
+
+
+.label {{
+    font-size:13px;
+    color:#94a3b8;
+    margin-bottom:8px;
+}}
+
 
 .row {{
     display:flex;
     justify-content:space-between;
-    margin:10px 0;
+    margin:6px 0;
+    font-size:17px;
 }}
 
-.val {{
-    color:#fbbf24;
-    font-weight:bold;
+
+.price {{
+    color:#facc15;
+    font-weight:600;
 }}
+
 
 .footer {{
     text-align:center;
     font-size:12px;
     margin-top:15px;
     color:#94a3b8;
+    animation: pulse 2s infinite;
 }}
+
+
+@keyframes pulse {{
+    0% {{ opacity:0.6; }}
+    50% {{ opacity:1; }}
+    100% {{ opacity:0.6; }}
+}}
+
+
+.refresh {{
+    font-size:11px;
+    margin-top:4px;
+    color:#64748b;
+}}
+
 </style>
 
 </head>
+
 
 <body>
 
@@ -107,32 +192,52 @@ h2 {{
 
 <h2>FDJ Live Rates</h2>
 
+
+<div class="section">
+
+<div class="label">Gold 24K (1 g)</div>
+
 <div class="row">
-<span>Gold Buy</span>
-<span class="val">₹ {g_buy}</span>
+<span>Buy</span>
+<span class="price">₹ {g_buy}</span>
 </div>
 
 <div class="row">
-<span>Gold Sell</span>
-<span class="val">₹ {g_sell}</span>
+<span>Sell</span>
+<span class="price">₹ {g_sell}</span>
 </div>
 
-<hr>
+</div>
+
+
+<div class="section">
+
+<div class="label">Silver (1 g)</div>
 
 <div class="row">
-<span>Silver Buy</span>
-<span class="val">₹ {s_buy}</span>
+<span>Buy</span>
+<span class="price">₹ {s_buy}</span>
 </div>
 
 <div class="row">
-<span>Silver Sell</span>
-<span class="val">₹ {s_sell}</span>
+<span>Sell</span>
+<span class="price">₹ {s_sell}</span>
 </div>
+
+</div>
+
 
 <div class="footer">
-Updated: {api_time}<br>
-Auto Refresh 60s
+
+Last Updated<br>
+<b>{api_time}</b>
+
+<div class="refresh">
+Auto Refresh: 10 Minutes
 </div>
+
+</div>
+
 
 </div>
 
@@ -145,7 +250,7 @@ Auto Refresh 60s
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
 
-    print("index.html created/updated successfully.")
+    print("index.html updated successfully.")
 
 
 

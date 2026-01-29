@@ -1,9 +1,9 @@
-name: Price Update Bot (Self Healing)
+name: Price Update Bot
 
 on:
+  schedule:
+    - cron: "0,10,20,30,40,50 * * * *"   # Only at 00,10,20,30,40,50
   workflow_dispatch:
-  repository_dispatch:
-    types: [self-run]
 
 
 permissions:
@@ -17,7 +17,7 @@ jobs:
 
     steps:
 
-      # Get repo
+      # Checkout repository
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -29,53 +29,29 @@ jobs:
           python-version: "3.11"
 
 
-      # Install dependency
+      # Install dependencies
       - name: Install Requests
         run: pip install requests
 
 
-      # Run updater (with retry safety)
-      - name: Run Script (Retry Safe)
-        run: |
-          for i in 1 2 3
-          do
-            python update_rates.py && break
-            echo "Retry $i..."
-            sleep 15
-          done
+      # Wait 30 seconds (to reach :30)
+      - name: Wait 30 Seconds
+        run: sleep 30
 
 
-      # Keep repo alive
-      - name: Update Heartbeat
-        run: |
-          date > heartbeat.txt
+      # Run update script
+      - name: Run Price Script
+        run: python update_rates.py
 
 
-      # Commit if changed
-      - name: Commit Changes
+      # Commit and push changes
+      - name: Commit and Push
         run: |
           git config user.name "Auto Bot"
           git config user.email "bot@users.noreply.github.com"
 
+          date > heartbeat.txt
+
           git add index.html heartbeat.txt
           git commit -m "Auto update prices" || exit 0
-
-
-      # Push
-      - name: Push Changes
-        run: git push
-
-
-      # Re-trigger itself
-      - name: Schedule Next Run (10 min)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "Waiting 10 minutes..."
-          sleep 600
-
-          curl -X POST \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${{ github.repository }}/dispatches \
-            -d '{"event_type":"self-run"}'
+          git push

@@ -4,10 +4,9 @@
 <head>
 
 <meta charset="UTF-8">
-
 <title>FDJ Live Rates</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
@@ -31,53 +30,24 @@ body{
     background:#1e293b;
     padding:22px;
     border-radius:18px;
-    box-shadow:0 15px 40px rgba(0,0,0,0.7);
 }
 
-h2{
-    text-align:center;
-    color:#facc15;
-    margin-bottom:18px;
-}
+h2{text-align:center;color:#facc15;}
 
 .section{
     background:rgba(255,255,255,0.05);
     padding:14px;
     border-radius:12px;
-    margin-bottom:12px;
+    margin:12px 0;
 }
 
-.label{
-    font-size:13px;
-    color:#94a3b8;
-    margin-bottom:6px;
-}
+.row{display:flex;justify-content:space-between;}
 
-.row{
-    display:flex;
-    justify-content:space-between;
-    font-size:16px;
-    margin:5px 0;
-}
+.price{color:#facc15;font-weight:600;}
 
-.price{
-    color:#facc15;
-    font-weight:600;
-}
+.footer{text-align:center;font-size:12px;color:#94a3b8;}
 
-.footer{
-    text-align:center;
-    font-size:12px;
-    margin-top:12px;
-    color:#94a3b8;
-}
-
-.timer{
-    margin-top:6px;
-    font-size:13px;
-    color:#38bdf8;
-    font-weight:500;
-}
+.timer{color:#38bdf8;font-weight:500;margin-top:6px;}
 
 </style>
 
@@ -89,76 +59,85 @@ h2{
 
 <h2>FDJ Live Rates</h2>
 
-<div class="section">
 
-<div class="label">Gold 24K (1 g)</div>
+<div class="section">
+<b>Gold 24K (1g)</b>
 
 <div class="row">
 <span>Buy</span>
-<span class="price">₹ 15,350.84</span>
+<span class="price">₹ 15,356.30</span>
 </div>
 
 <div class="row">
 <span>Sell</span>
-<span class="price">₹ 14,870.19</span>
+<span class="price">₹ 14,875.47</span>
 </div>
-
 </div>
 
 
 <div class="section">
-
-<div class="label">Silver (1 g)</div>
+<b>Silver (1g)</b>
 
 <div class="row">
 <span>Buy</span>
-<span class="price">₹ 271.16</span>
+<span class="price">₹ 270.30</span>
 </div>
 
 <div class="row">
 <span>Sell</span>
-<span class="price">₹ 256.57</span>
+<span class="price">₹ 255.76</span>
 </div>
-
 </div>
 
 
 <div class="footer">
 
 Last Updated<br>
-<b>03-02-2026 09:30</b>
+<b>03-02-2026 09:50:17</b>
 
 <div class="timer">
-Next refresh in: <span id="countdown">10:00</span>
+Next refresh in: <span id="countdown"></span>
 </div>
 
 </div>
 
 </div>
+
+
+<!-- Hidden timestamp -->
+<div id="lastUpdate" data-time="1770092433" style="display:none"></div>
 
 
 <script>
 
-let timeLeft = 600;
+const INTERVAL = 600;
 
-const el = document.getElementById("countdown");
+const last =
+  Number(document.getElementById("lastUpdate").dataset.time);
 
-setInterval(()=>{
+function updateTimer(){
+    
+    const now = Math.floor(Date.now()/1000);
 
-    let m = Math.floor(timeLeft/60);
-    let s = timeLeft%60;
+    let left = (last + INTERVAL) - now;
 
-    el.innerText =
-      String(m).padStart(2,"0")+":"+
-      String(s).padStart(2,"0");
+    if(left < 0) left = 0;
 
-    timeLeft--;
+    let m = Math.floor(left/60);
+    let s = left % 60;
 
-    if(timeLeft < 0){
+    document.getElementById("countdown").innerText =
+        String(m).padStart(2,"0") + ":" +
+        String(s).padStart(2,"0");
+
+    if(left === 0){
         location.reload();
     }
+}
 
-},1000);
+updateTimer();
+
+setInterval(updateTimer,1000);
 
 </script>
 

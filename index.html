@@ -12,7 +12,7 @@
 
 <style>
 
-*{box-sizing:border-box;font-family:'Poppins',sans-serif;}
+*{font-family:'Poppins',sans-serif;box-sizing:border-box}
 
 body{
     margin:0;
@@ -32,7 +32,7 @@ body{
     border-radius:18px;
 }
 
-h2{text-align:center;color:#facc15;}
+h2{text-align:center;color:#facc15}
 
 .section{
     background:rgba(255,255,255,0.05);
@@ -41,13 +41,11 @@ h2{text-align:center;color:#facc15;}
     margin:12px 0;
 }
 
-.row{display:flex;justify-content:space-between;}
+.row{display:flex;justify-content:space-between}
 
-.price{color:#facc15;font-weight:600;}
+.price{color:#facc15;font-weight:600}
 
-.footer{text-align:center;font-size:12px;color:#94a3b8;}
-
-.timer{color:#38bdf8;font-weight:500;margin-top:6px;}
+.footer{text-align:center;font-size:12px;color:#94a3b8}
 
 </style>
 
@@ -61,85 +59,47 @@ h2{text-align:center;color:#facc15;}
 
 
 <div class="section">
+
 <b>Gold 24K (1g)</b>
 
 <div class="row">
 <span>Buy</span>
-<span class="price">₹ 15,356.30</span>
+<span class="price">₹ 15,395.98</span>
 </div>
 
 <div class="row">
 <span>Sell</span>
-<span class="price">₹ 14,875.47</span>
+<span class="price">₹ 14,913.91</span>
 </div>
+
 </div>
 
 
 <div class="section">
+
 <b>Silver (1g)</b>
 
 <div class="row">
 <span>Buy</span>
-<span class="price">₹ 270.30</span>
+<span class="price">₹ 271.12</span>
 </div>
 
 <div class="row">
 <span>Sell</span>
-<span class="price">₹ 255.76</span>
+<span class="price">₹ 256.53</span>
 </div>
+
 </div>
 
 
 <div class="footer">
 
 Last Updated<br>
-<b>03-02-2026 09:50:17</b>
-
-<div class="timer">
-Next refresh in: <span id="countdown"></span>
-</div>
+<b>03-02-2026 10:10:17</b>
 
 </div>
 
 </div>
-
-
-<!-- Hidden timestamp -->
-<div id="lastUpdate" data-time="1770092433" style="display:none"></div>
-
-
-<script>
-
-const INTERVAL = 600;
-
-const last =
-  Number(document.getElementById("lastUpdate").dataset.time);
-
-function updateTimer(){
-    
-    const now = Math.floor(Date.now()/1000);
-
-    let left = (last + INTERVAL) - now;
-
-    if(left < 0) left = 0;
-
-    let m = Math.floor(left/60);
-    let s = left % 60;
-
-    document.getElementById("countdown").innerText =
-        String(m).padStart(2,"0") + ":" +
-        String(s).padStart(2,"0");
-
-    if(left === 0){
-        location.reload();
-    }
-}
-
-updateTimer();
-
-setInterval(updateTimer,1000);
-
-</script>
 
 </body>
 </html>

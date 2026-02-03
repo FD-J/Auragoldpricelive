@@ -6,6 +6,10 @@
 <meta charset="UTF-8">
 <title>FDJ Live Rates</title>
 
+<!-- Website Logo -->
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
@@ -66,12 +70,12 @@ h2{text-align:center;color:#facc15}
 
 <div class="row">
 <span>Buy</span>
-<span class="price">₹ 15,608.32</span>
+<span class="price">₹ 15,583.52</span>
 </div>
 
 <div class="row">
 <span>Sell</span>
-<span class="price">₹ 15,119.61</span>
+<span class="price">₹ 15,095.58</span>
 </div>
 
 </div>
@@ -83,12 +87,12 @@ h2{text-align:center;color:#facc15}
 
 <div class="row">
 <span>Buy</span>
-<span class="price">₹ 275.43</span>
+<span class="price">₹ 279.65</span>
 </div>
 
 <div class="row">
 <span>Sell</span>
-<span class="price">₹ 260.61</span>
+<span class="price">₹ 264.61</span>
 </div>
 
 </div>
@@ -97,7 +101,7 @@ h2{text-align:center;color:#facc15}
 <div class="footer">
 
 Last Updated<br>
-<b>03-02-2026 12:30:17</b>
+<b>03-02-2026 12:40:17</b>
 
 <div class="timer">
 Next refresh in: <span id="countdown">--:--</span>
@@ -108,8 +112,8 @@ Next refresh in: <span id="countdown">--:--</span>
 </div>
 
 
-<!-- Bot timestamp -->
-<div id="botTime" data-time="1770102107" style="display:none"></div>
+<!-- Bot Timestamp -->
+<div id="botTime" data-time="1770102618" style="display:none"></div>
 
 
 <script>
@@ -134,14 +138,12 @@ function updateTimer(){
         String(m).padStart(2,"0") + ":" +
         String(s).padStart(2,"0");
 
-    // Auto reload when new data expected
     if(left === 0){
         location.reload();
     }
 }
 
 updateTimer();
-
 setInterval(updateTimer,1000);
 
 </script>

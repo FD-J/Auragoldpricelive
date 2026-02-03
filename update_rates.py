@@ -42,7 +42,7 @@ def format_time(api_time):
 
 def main():
 
-    # Bot run time (UNIX)
+    # Bot run time (UNIX timestamp)
     last_run = int(time.time())
 
 
@@ -59,11 +59,11 @@ def main():
     s_sell = f"{float(silver['aura_sell_price']):,.2f}"
 
 
-    # Time
+    # API Time
     api_time = format_time(gold.get("created_at", ""))
 
 
-    # HTML Page
+    # HTML Page (Auto Generated)
     html = f"""
 <!DOCTYPE html>
 <html lang="en">
@@ -71,6 +71,10 @@ def main():
 
 <meta charset="UTF-8">
 <title>FDJ Live Rates</title>
+
+<!-- Website Logo -->
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -174,7 +178,7 @@ Next refresh in: <span id="countdown">--:--</span>
 </div>
 
 
-<!-- Bot timestamp -->
+<!-- Bot Timestamp -->
 <div id="botTime" data-time="{last_run}" style="display:none"></div>
 
 
@@ -200,14 +204,12 @@ function updateTimer(){{
         String(m).padStart(2,"0") + ":" +
         String(s).padStart(2,"0");
 
-    // Auto reload when new data expected
     if(left === 0){{
         location.reload();
     }}
 }}
 
 updateTimer();
-
 setInterval(updateTimer,1000);
 
 </script>

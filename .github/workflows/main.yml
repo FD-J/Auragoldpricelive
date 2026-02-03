@@ -65,6 +65,7 @@ jobs:
 
       # Re-trigger after 10 minutes
       - name: Schedule Next Run (10 min)
+      if: success()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

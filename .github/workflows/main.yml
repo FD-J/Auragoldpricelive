@@ -18,18 +18,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-
       # Setup Python
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-
       # Install Requests
       - name: Install Requests
         run: pip install requests
-
 
       # Run Script (Retry Safe)
       - name: Run Script (Retry Safe)
@@ -41,12 +38,10 @@ jobs:
             sleep 15
           done
 
-
       # Update Heartbeat
       - name: Update Heartbeat
         run: |
           date > heartbeat.txt
-
 
       # Commit Changes
       - name: Commit Changes
@@ -57,15 +52,13 @@ jobs:
           git add index.html heartbeat.txt
           git commit -m "Auto update prices" || exit 0
 
-
       # Push Changes
       - name: Push Changes
         run: git push
 
-
-      # Re-trigger after 10 minutes
+      # Re-trigger after 10 minutes (Safe)
       - name: Schedule Next Run (10 min)
-      if: success()
+        if: success()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

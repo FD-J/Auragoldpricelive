@@ -1,14 +1,17 @@
 import requests
 import datetime
+import time
 
 
 G_URL = "https://api.auragold.in/api/data/v1/prices?product=24KGOLD"
 S_URL = "https://api.auragold.in/api/data/v1/prices?product=24KSILVER"
 
+INTERVAL = 600   # 10 minutes in seconds
+
 
 def get_data(url):
 
-    ts = int(datetime.datetime.now().timestamp())
+    ts = int(time.time())
 
     r = requests.get(
         f"{url}&t={ts}",
@@ -27,10 +30,13 @@ def format_time(t):
         t.replace("Z","+00:00")
     )
 
-    return dt.strftime("%d-%m-%Y %H:%M")
+    return dt.strftime("%d-%m-%Y %H:%M:%S")
 
 
 def main():
+
+    now = int(time.time())   # current unix time
+
 
     gold = get_data(G_URL)
     silver = get_data(S_URL)
@@ -43,7 +49,7 @@ def main():
     s_sell = f"{float(silver['aura_sell_price']):,.2f}"
 
 
-    time = format_time(gold["created_at"])
+    time_str = format_time(gold["created_at"])
 
 
     html = f"""
@@ -52,10 +58,9 @@ def main():
 <head>
 
 <meta charset="UTF-8">
-
 <title>FDJ Live Rates</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
@@ -79,53 +84,24 @@ body{{
     background:#1e293b;
     padding:22px;
     border-radius:18px;
-    box-shadow:0 15px 40px rgba(0,0,0,0.7);
 }}
 
-h2{{
-    text-align:center;
-    color:#facc15;
-    margin-bottom:18px;
-}}
+h2{{text-align:center;color:#facc15;}}
 
 .section{{
     background:rgba(255,255,255,0.05);
     padding:14px;
     border-radius:12px;
-    margin-bottom:12px;
+    margin:12px 0;
 }}
 
-.label{{
-    font-size:13px;
-    color:#94a3b8;
-    margin-bottom:6px;
-}}
+.row{{display:flex;justify-content:space-between;}}
 
-.row{{
-    display:flex;
-    justify-content:space-between;
-    font-size:16px;
-    margin:5px 0;
-}}
+.price{{color:#facc15;font-weight:600;}}
 
-.price{{
-    color:#facc15;
-    font-weight:600;
-}}
+.footer{{text-align:center;font-size:12px;color:#94a3b8;}}
 
-.footer{{
-    text-align:center;
-    font-size:12px;
-    margin-top:12px;
-    color:#94a3b8;
-}}
-
-.timer{{
-    margin-top:6px;
-    font-size:13px;
-    color:#38bdf8;
-    font-weight:500;
-}}
+.timer{{color:#38bdf8;font-weight:500;margin-top:6px;}}
 
 </style>
 
@@ -137,9 +113,9 @@ h2{{
 
 <h2>FDJ Live Rates</h2>
 
-<div class="section">
 
-<div class="label">Gold 24K (1 g)</div>
+<div class="section">
+<b>Gold 24K (1g)</b>
 
 <div class="row">
 <span>Buy</span>
@@ -150,13 +126,11 @@ h2{{
 <span>Sell</span>
 <span class="price">₹ {g_sell}</span>
 </div>
-
 </div>
 
 
 <div class="section">
-
-<div class="label">Silver (1 g)</div>
+<b>Silver (1g)</b>
 
 <div class="row">
 <span>Buy</span>
@@ -167,46 +141,57 @@ h2{{
 <span>Sell</span>
 <span class="price">₹ {s_sell}</span>
 </div>
-
 </div>
 
 
 <div class="footer">
 
 Last Updated<br>
-<b>{time}</b>
+<b>{time_str}</b>
 
 <div class="timer">
-Next refresh in: <span id="countdown">10:00</span>
+Next refresh in: <span id="countdown"></span>
 </div>
 
 </div>
 
 </div>
+
+
+<!-- Hidden timestamp -->
+<div id="lastUpdate" data-time="{now}" style="display:none"></div>
 
 
 <script>
 
-let timeLeft = 600;
+const INTERVAL = {INTERVAL};
 
-const el = document.getElementById("countdown");
+const last =
+  Number(document.getElementById("lastUpdate").dataset.time);
 
-setInterval(()=>{{
+function updateTimer(){{
+    
+    const now = Math.floor(Date.now()/1000);
 
-    let m = Math.floor(timeLeft/60);
-    let s = timeLeft%60;
+    let left = (last + INTERVAL) - now;
 
-    el.innerText =
-      String(m).padStart(2,"0")+":"+
-      String(s).padStart(2,"0");
+    if(left < 0) left = 0;
 
-    timeLeft--;
+    let m = Math.floor(left/60);
+    let s = left % 60;
 
-    if(timeLeft < 0){{
+    document.getElementById("countdown").innerText =
+        String(m).padStart(2,"0") + ":" +
+        String(s).padStart(2,"0");
+
+    if(left === 0){{
         location.reload();
     }}
+}}
 
-}},1000);
+updateTimer();
+
+setInterval(updateTimer,1000);
 
 </script>
 
@@ -219,8 +204,8 @@ setInterval(()=>{{
         f.write(html)
 
 
-    print("Updated successfully")
+    print("Updated at", now)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()

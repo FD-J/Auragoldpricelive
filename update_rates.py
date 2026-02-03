@@ -8,6 +8,10 @@ G_URL = "https://api.auragold.in/api/data/v1/prices?product=24KGOLD"
 S_URL = "https://api.auragold.in/api/data/v1/prices?product=24KSILVER"
 
 
+# 10 minutes = 600 seconds
+INTERVAL = 600
+
+
 def get_data(url):
 
     ts = int(time.time())
@@ -38,7 +42,8 @@ def format_time(api_time):
 
 def main():
 
-    now = int(time.time())
+    # Bot run time (UNIX)
+    last_run = int(time.time())
 
 
     # Get API Data
@@ -108,6 +113,8 @@ h2{{text-align:center;color:#facc15}}
 
 .footer{{text-align:center;font-size:12px;color:#94a3b8}}
 
+.timer{{color:#38bdf8;font-weight:500;margin-top:6px}}
+
 </style>
 
 </head>
@@ -158,9 +165,52 @@ h2{{text-align:center;color:#facc15}}
 Last Updated<br>
 <b>{api_time}</b>
 
+<div class="timer">
+Next refresh in: <span id="countdown">--:--</span>
 </div>
 
 </div>
+
+</div>
+
+
+<!-- Bot timestamp -->
+<div id="botTime" data-time="{last_run}" style="display:none"></div>
+
+
+<script>
+
+const INTERVAL = {INTERVAL};
+
+const last =
+  Number(document.getElementById("botTime").dataset.time);
+
+function updateTimer(){{
+    
+    const now = Math.floor(Date.now()/1000);
+
+    let left = (last + INTERVAL) - now;
+
+    if(left < 0) left = 0;
+
+    let m = Math.floor(left/60);
+    let s = left % 60;
+
+    document.getElementById("countdown").innerText =
+        String(m).padStart(2,"0") + ":" +
+        String(s).padStart(2,"0");
+
+    // Auto reload when new data expected
+    if(left === 0){{
+        location.reload();
+    }}
+}}
+
+updateTimer();
+
+setInterval(updateTimer,1000);
+
+</script>
 
 </body>
 </html>
@@ -174,10 +224,10 @@ Last Updated<br>
 
     # Save Heartbeat
     with open("heartbeat.txt", "w") as f:
-        f.write(str(now))
+        f.write(str(last_run))
 
 
-    print("Updated at:", now)
+    print("Updated at:", last_run)
 
 
 if __name__ == "__main__":

@@ -2,53 +2,40 @@ import requests
 import datetime
 
 
-# API URLs
 G_URL = "https://api.auragold.in/api/data/v1/prices?product=24KGOLD"
 S_URL = "https://api.auragold.in/api/data/v1/prices?product=24KSILVER"
 
 
-def get_api_data(url):
-    try:
-        ts = int(datetime.datetime.now().timestamp())
+def get_data(url):
 
-        response = requests.get(
-            f"{url}&t={ts}",
-            timeout=15,
-            headers={"Cache-Control": "no-cache"}
-        )
+    ts = int(datetime.datetime.now().timestamp())
 
-        response.raise_for_status()
-        return response.json().get("data", None)
+    r = requests.get(
+        f"{url}&t={ts}",
+        headers={"Cache-Control": "no-cache"},
+        timeout=15
+    )
 
-    except Exception as e:
-        print("API Error:", e)
-        return None
+    r.raise_for_status()
+
+    return r.json()["data"]
 
 
-def format_time(api_time):
+def format_time(t):
 
-    try:
-        # Convert API time to readable format
-        dt = datetime.datetime.fromisoformat(api_time.replace("Z", "+00:00"))
+    dt = datetime.datetime.fromisoformat(
+        t.replace("Z","+00:00")
+    )
 
-        return dt.strftime("%d-%m-%Y  %H:%M")
-
-    except:
-        return datetime.datetime.now().strftime("%d-%m-%Y  %H:%M")
-
+    return dt.strftime("%d-%m-%Y %H:%M")
 
 
 def main():
 
-    gold = get_api_data(G_URL)
-    silver = get_api_data(S_URL)
-
-    if not gold or not silver:
-        print("API Failed. File not updated.")
-        return
+    gold = get_data(G_URL)
+    silver = get_data(S_URL)
 
 
-    # Prices
     g_buy = f"{float(gold['aura_buy_price']):,.2f}"
     g_sell = f"{float(gold['aura_sell_price']):,.2f}"
 
@@ -56,142 +43,99 @@ def main():
     s_sell = f"{float(silver['aura_sell_price']):,.2f}"
 
 
-    # Format Time
-    api_time_raw = gold.get("created_at", "")
-    api_time = format_time(api_time_raw)
+    time = format_time(gold["created_at"])
 
 
-    # HTML
     html = f"""
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
+
 <title>FDJ Live Rates</title>
 
-<!-- Auto refresh handled by GitHub bot -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
 
-* {{
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
-}}
+*{{box-sizing:border-box;font-family:'Poppins',sans-serif;}}
 
-body {{
-    background: linear-gradient(135deg,#020617,#020617,#020617,#020617);
-    height:100vh;
+body{{
+    margin:0;
+    background:#020617;
+    min-height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
     color:white;
 }}
 
-
-.card {{
-    background: rgba(30,41,59,0.9);
-    width:360px;
-    padding:28px;
-    border-radius:22px;
-    box-shadow:0 25px 60px rgba(0,0,0,0.7);
-    animation: slideUp 1s ease;
-    backdrop-filter: blur(10px);
+.card{{
+    width:100%;
+    max-width:360px;
+    background:#1e293b;
+    padding:22px;
+    border-radius:18px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.7);
 }}
 
-
-@keyframes slideUp {{
-    from {{
-        opacity:0;
-        transform:translateY(40px);
-    }}
-    to {{
-        opacity:1;
-        transform:translateY(0);
-    }}
-}}
-
-
-h2 {{
+h2{{
     text-align:center;
     color:#facc15;
-    margin-bottom:25px;
-    font-weight:600;
+    margin-bottom:18px;
 }}
 
-
-.section {{
-    background: rgba(255,255,255,0.04);
-    padding:15px;
-    border-radius:14px;
-    margin-bottom:15px;
-    animation: fadeIn 1.3s ease;
+.section{{
+    background:rgba(255,255,255,0.05);
+    padding:14px;
+    border-radius:12px;
+    margin-bottom:12px;
 }}
 
-
-@keyframes fadeIn {{
-    from {{ opacity:0; }}
-    to {{ opacity:1; }}
-}}
-
-
-.label {{
+.label{{
     font-size:13px;
     color:#94a3b8;
-    margin-bottom:8px;
+    margin-bottom:6px;
 }}
 
-
-.row {{
+.row{{
     display:flex;
     justify-content:space-between;
-    margin:6px 0;
-    font-size:17px;
+    font-size:16px;
+    margin:5px 0;
 }}
 
-
-.price {{
+.price{{
     color:#facc15;
     font-weight:600;
 }}
 
-
-.footer {{
+.footer{{
     text-align:center;
     font-size:12px;
-    margin-top:15px;
+    margin-top:12px;
     color:#94a3b8;
-    animation: pulse 2s infinite;
 }}
 
-
-@keyframes pulse {{
-    0% {{ opacity:0.6; }}
-    50% {{ opacity:1; }}
-    100% {{ opacity:0.6; }}
-}}
-
-
-.refresh {{
-    font-size:11px;
-    margin-top:4px;
-    color:#64748b;
+.timer{{
+    margin-top:6px;
+    font-size:13px;
+    color:#38bdf8;
+    font-weight:500;
 }}
 
 </style>
 
 </head>
 
-
 <body>
 
 <div class="card">
 
 <h2>FDJ Live Rates</h2>
-
 
 <div class="section">
 
@@ -230,29 +174,53 @@ h2 {{
 <div class="footer">
 
 Last Updated<br>
-<b>{api_time}</b>
+<b>{time}</b>
 
-<div class="refresh">
-Auto Refresh: 10 Minutes
+<div class="timer">
+Next refresh in: <span id="countdown">10:00</span>
 </div>
 
 </div>
 
-
 </div>
+
+
+<script>
+
+let timeLeft = 600;
+
+const el = document.getElementById("countdown");
+
+setInterval(()=>{{
+
+    let m = Math.floor(timeLeft/60);
+    let s = timeLeft%60;
+
+    el.innerText =
+      String(m).padStart(2,"0")+":"+
+      String(s).padStart(2,"0");
+
+    timeLeft--;
+
+    if(timeLeft < 0){{
+        location.reload();
+    }}
+
+}},1000);
+
+</script>
 
 </body>
 </html>
 """
 
 
-    # Write file
-    with open("index.html", "w", encoding="utf-8") as f:
+    with open("index.html","w",encoding="utf-8") as f:
         f.write(html)
 
-    print("index.html updated successfully.")
+
+    print("Updated successfully")
 
 
-
-if __name__ == "__main__":
+if __name__=="__main__":
     main()
